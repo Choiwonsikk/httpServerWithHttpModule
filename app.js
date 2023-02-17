@@ -40,7 +40,26 @@ const httpRequestListener = (request, response) => {
       response.end(JSON.stringify({ message: "pong!" }));
     }
   } else if (request.method === "POST") {
-    if (request.url === "/posts") {
+    if (request.url === "/users") {
+      let body = "";
+      // data가 stream 형태로 들어온다.
+      request.on("data", (data) => {
+        body += data;
+      });
+      request.on("end", () => {
+        const user = JSON.parse(body);
+
+        users.push({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          password: user.password,
+        });
+
+        response.writeHead(201, { "Content-Type": "application/json" }); // (4)
+        response.end(JSON.stringify({ message: "userCreated" })); // (5)
+      });
+    } else if (request.url === "/posts") {
       let body = "";
       // data가 stream 형태로 들어온다.
       request.on("data", (data) => {
