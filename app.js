@@ -52,13 +52,12 @@ const httpRequestListener = (request, response) => {
       //posts 객체에서 id, title content 데이터를 가져와서
       //객체 한 묶음에 표시한다.
       // data 배열을 만들고 하나씩 push 한다.
-      let databody = "";
+      let body = "";
+      // data가 stream 형태로 들어온다.
       request.on("data", (data) => {
-        databody += data;
+        body += data;
       });
       request.on("end", () => {
-        // const data = JSON.parse(body);
-
         for (let i = 0; i < posts.length; i++) {
           //postlength 배열 개수만큼 반복
           if (users[i].id === posts[i].id) {
@@ -84,9 +83,9 @@ const httpRequestListener = (request, response) => {
       request.on("data", (data) => {
         body += data;
       });
+
       request.on("end", () => {
         const user = JSON.parse(body);
-
         users.push({
           id: user.id,
           name: user.name,
@@ -115,6 +114,38 @@ const httpRequestListener = (request, response) => {
 
         response.writeHead(201, { "Content-Type": "application/json" }); // (4)
         response.end(JSON.stringify({ message: posts })); // (5)
+      });
+    }
+  } else if (request.method === "PATCH") {
+    // "PATCH" 업데이트
+    if (request.url === "/update") {
+      // posts안의 postingId 값이 1인 값 "노드"로 수정
+      // 수정한 값을 data 배열안에 push()
+      let body = "";
+      request.on("data", (data) => {
+        body += data;
+      });
+
+      request.on("end", () => {
+        const update = JSON.parse(body);
+        const ID = update.postingId; //ID값은 1
+        // body값을 가져와서 postingId와 값이 같다면 내용을 수정하고 출력.
+        for (let i = 0; i < posts.length; i++) {
+          if (posts[i].id === ID) {
+            posts[i].content = update.data;
+
+            datas.push({
+              userID: users[i].id,
+              userName: users[i].name,
+              postingId: posts[i].id,
+              postingTitle: posts[i].title,
+              postingContent: posts[i].content,
+            });
+          }
+        }
+
+        response.writeHead(201, { "Content-Type": "application/json" });
+        response.end(JSON.stringify({ data: datas }));
       });
     }
   }
