@@ -48,7 +48,51 @@ const httpRequestListener = (request, response) => {
     if (request.url === "/ping") {
       response.writeHead(200, { "Content-Type": "application/json" }); // (4)
       response.end(JSON.stringify({ message: "pong!" }));
+    } else if (request.url === "/selectdata") {
+      //GET
+      // posts 배열 전체에서 userID와 users.id 값 비교 후
+      //같은 값이 들어있는 posts 배열에서 posts.id , name , content를 가져와 배열에 push
+      let body = "";
+      // data가 stream 형태로 들어온다.
+      request.on("data", (data) => {
+        body += data;
+      });
+      //   console.log("body값 받기");
+      request.on("end", () => {
+        const getUserId = JSON.parse(body);
+        // 유저 아이디 데이터 받아옴
+        let userPostData = {};
+        for (let i = 0; i < users.length; i++) {
+          if (getUserId.id === users[i].id) {
+            userPostData.userID = users[i].id;
+            userPostData.userName = users[i].name;
+            userPostData.postings = [];
+          }
+        }
+        // console.log(`userpostdata값 넣기 ====> ${userPostData}`);
+        //객체에 users.id, users.name, posting 키 값 넣기
+
+        for (let i = 0; i < posts.length; i++) {
+          if (getUserId.id === posts[i].userId) {
+            const userPostingData = {};
+            userPostingData.postingId = posts[i].id;
+            userPostingData.postingName = posts[i].title;
+            userPostingData.postingContent = posts[i].content;
+
+            console.log(posts[i].userId);
+            console.log(posts[i].id);
+            console.log(posts[i].title);
+            console.log(posts[i].content);
+
+            userPostData.postings.push(userPostingData);
+          } //userPostData.posting.push()
+        }
+
+        response.writeHead(201, { "Content-Type": "application/json" }); // (4)
+        response.end(JSON.stringify({ data: userPostData })); // (5)
+      });
     } else if (request.url === "/data") {
+      //GET
       //users 객체에서 id와 name 데이터를 뽑고
       //posts 객체에서 id, title content 데이터를 가져와서
       //객체 한 묶음에 표시한다.
