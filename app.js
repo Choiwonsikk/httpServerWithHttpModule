@@ -7,6 +7,7 @@ const datas = [
   // postingContent: "",
   //   },
 ];
+
 const users = [
   {
     id: 1,
@@ -128,10 +129,10 @@ const httpRequestListener = (request, response) => {
 
       request.on("end", () => {
         const update = JSON.parse(body);
-        const ID = update.postingId; //ID값은 1
+        const updateId = update.postingId; //ID값은 1
         // body값을 가져와서 postingId와 값이 같다면 내용을 수정하고 출력.
         for (let i = 0; i < posts.length; i++) {
-          if (posts[i].id === ID) {
+          if (posts[i].id === updateId) {
             posts[i].content = update.data;
 
             datas.push({
@@ -146,6 +147,26 @@ const httpRequestListener = (request, response) => {
 
         response.writeHead(201, { "Content-Type": "application/json" });
         response.end(JSON.stringify({ data: datas }));
+      });
+    }
+  } else if (request.method === "DELETE") {
+    // "DELETE" 업데이트
+    if (request.url === "/delete") {
+      let body = "";
+      request.on("data", (data) => {
+        body += data;
+      });
+
+      request.on("end", () => {
+        const deletePostId = JSON.parse(body);
+
+        for (let dleteIndex = 0; dleteIndex < posts.length; dleteIndex++) {
+          if (posts[dleteIndex].id === deletePostId.id) {
+            posts.splice(dleteIndex, 1);
+          }
+        }
+        response.writeHead(201, { "Content-Type": "application/json" });
+        response.end(JSON.stringify({ message: "postingDeleted" }));
       });
     }
   }
